@@ -1,0 +1,8 @@
+{
+  "feedsEndpoint": "http://tech.uzabase.com/rss",
+  "processPhrase": "NewsPicks",
+  "fieldsToProcess": [
+    "title",
+    "description"
+  ]
+}
