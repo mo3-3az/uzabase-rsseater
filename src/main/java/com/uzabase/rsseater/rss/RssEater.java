@@ -16,7 +16,7 @@ import java.io.InputStream;
  * <ul>
  * <li>Load configurations.</li>
  * <li>Consume feeds.</li>
- * <li>Processs feeds.</li>
+ * <li>Process feeds.</li>
  * <li>Print out results.</li>
  * </ul>
  *
