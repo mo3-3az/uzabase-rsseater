@@ -1,16 +1,13 @@
 package com.uzabase.rsseater.convert;
 
-import com.uzabase.rsseater.feeds.Feeds;
+import com.uzabase.rsseater.config.Config;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.util.List;
+import javax.xml.stream.*;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.XMLEvent;
+import java.io.InputStream;
+import java.io.StringWriter;
 
 /**
  * @author Moath
@@ -18,44 +15,59 @@ import java.util.List;
 public class XmlFeedsConverter implements FeedsConverter {
 
     private final static Logger logger = Logger.getLogger(XmlFeedsConverter.class);
-    private static final String RSS_CHANNEL_ITEM = "/rss/channel/item";
+    private static final String EMPTY_STRING = "";
 
-    private List<String> fieldsToProcess;
+    private Config config;
     private String processPhrase;
 
-    public XmlFeedsConverter(List<String> fieldsToProcess, String processPhrase) {
-        this.fieldsToProcess = fieldsToProcess;
-        this.processPhrase = processPhrase;
+    public XmlFeedsConverter(Config config) {
+        this.config = config;
+        processPhrase = config.caseSensitive() ? config.getProcessPhrase() : "(?i)" + config.getProcessPhrase();
     }
 
     @Override
-    public Feeds convert(Document xmlFeeds) {
-        logger.info("");
-        XPath xPath = XPathFactory.newInstance().newXPath();
-        Feeds feeds = new Feeds(xmlFeeds);
+    public String convert(InputStream xmlFeeds) {
+        final StringWriter xmlStringWriter = new StringWriter();
         try {
-            NodeList nodeList = (NodeList) xPath.compile(RSS_CHANNEL_ITEM).evaluate(xmlFeeds, XPathConstants.NODESET);
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Node node = nodeList.item(i);
-                fieldsToProcess.forEach(field -> {
-                    try {
-                        processFields((NodeList) xPath.compile("//" + field).evaluate(node, XPathConstants.NODESET));
-                    } catch (XPathExpressionException e) {
-                        logger.error("Error while converting xml feeds", e);
-                    }
-                });
+            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+            XMLEventReader reader = inputFactory.createXMLEventReader(xmlFeeds);
+
+            XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+            XMLEventWriter writer = outputFactory.createXMLEventWriter(xmlStringWriter);
+
+            XMLEventFactory eventFactory = XMLEventFactory.newInstance();
+
+            String lastProcessedTag = EMPTY_STRING;
+            while (reader.hasNext()) {
+                final XMLEvent xmlEvent = reader.nextEvent();
+                if (isNotFieldOfIntrest(lastProcessedTag, xmlEvent)) {
+                    writer.add(xmlEvent);
+                    lastProcessedTag = xmlEvent.isStartElement() ? xmlEvent.asStartElement().getName().toString() : EMPTY_STRING;
+                    continue;
+                }
+
+                String data = xmlEvent.asCharacters().getData();
+                final Characters characters = eventFactory.createCharacters(data.replaceAll(processPhrase, EMPTY_STRING));
+
+                if (data.equals("\"")) {
+                    characters.writeAsEncodedUnicode(xmlStringWriter);
+                } else if (data.equals("'")) {
+                    xmlStringWriter.write("&#39;");
+                } else {
+                    writer.add(characters);
+                }
             }
-        } catch (XPathExpressionException e) {
-            logger.error("Error while converting xml feeds", e);
 
+            xmlStringWriter.flush();
+        } catch (XMLStreamException e) {
+            logger.error("Error while converting xml feeds!", e);
         }
-        return feeds;
+
+        return xmlStringWriter.toString();
     }
 
-    private void processFields(NodeList nodeList) {
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Node node = nodeList.item(i);
-            node.setTextContent(node.getTextContent().replaceAll(processPhrase, ""));
-        }
+    private boolean isNotFieldOfIntrest(String lastProcessedTag, XMLEvent xmlEvent) {
+        return !xmlEvent.isCharacters() || !config.getFieldsToProcess().contains(lastProcessedTag);
     }
+
 }

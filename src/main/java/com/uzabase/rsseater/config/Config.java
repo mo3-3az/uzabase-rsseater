@@ -11,6 +11,8 @@ public interface Config {
 
     String getProcessPhrase();
 
+    boolean  caseSensitive();
+
     List<String> getFieldsToProcess();
 
 }

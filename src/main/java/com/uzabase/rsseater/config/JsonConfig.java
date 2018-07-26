@@ -21,12 +21,10 @@ public class JsonConfig implements Config {
 
     private static final String FEEDS_ENDPOINT = "feedsEndpoint";
     private static final String PROCESS_PHRASE = "processPhrase";
+    private static final String CASE_SENSITIVE = "caseSensitive";
     private static final String FIELDS_TO_PROCESS = "fieldsToProcess";
 
     private JsonObject config;
-    private String feedsEndpoint;
-    private String processPhrase;
-    private List<String> fieldsToProcess;
 
     public JsonConfig(String configFile) {
         InputStream configFileStream;
@@ -44,26 +42,25 @@ public class JsonConfig implements Config {
         }
 
         config = new JsonParser().parse(new InputStreamReader(configFileStream)).getAsJsonObject();
-        initConfig();
-    }
-
-    private void initConfig() {
-        feedsEndpoint = config.get(FEEDS_ENDPOINT).getAsString();
-        processPhrase = config.get(PROCESS_PHRASE).getAsString();
-        fieldsToProcess = new ArrayList<>();
-        config.getAsJsonArray(FIELDS_TO_PROCESS).forEach(item -> fieldsToProcess.add(item.getAsString()));
     }
 
     public String getFeedsEndpoint() {
-        return feedsEndpoint;
+        return config.get(FEEDS_ENDPOINT).getAsString();
     }
 
     @Override
     public String getProcessPhrase() {
-        return processPhrase;
+        return config.get(PROCESS_PHRASE).getAsString();
+    }
+
+    @Override
+    public boolean caseSensitive() {
+        return config.get(CASE_SENSITIVE).getAsBoolean();
     }
 
     public List<String> getFieldsToProcess() {
+        List<String> fieldsToProcess = new ArrayList<>();
+        config.getAsJsonArray(FIELDS_TO_PROCESS).forEach(item -> fieldsToProcess.add(item.getAsString()));
         return fieldsToProcess;
     }
 }

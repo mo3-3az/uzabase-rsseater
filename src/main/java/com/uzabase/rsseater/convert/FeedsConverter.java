@@ -1,11 +1,8 @@
 package com.uzabase.rsseater.convert;
 
-import com.uzabase.rsseater.feeds.Feeds;
-import org.w3c.dom.Document;
-
-import java.util.List;
+import java.io.InputStream;
 
 public interface FeedsConverter {
 
-    Feeds convert(Document feeds);
+    String convert(InputStream feeds);
 }

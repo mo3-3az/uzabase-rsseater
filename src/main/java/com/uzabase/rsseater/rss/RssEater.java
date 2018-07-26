@@ -1,16 +1,17 @@
-package com.uzabase.rsseater;
+package com.uzabase.rsseater.rss;
 
 import com.uzabase.rsseater.config.Config;
 import com.uzabase.rsseater.config.JsonConfig;
 import com.uzabase.rsseater.convert.FeedsConverter;
 import com.uzabase.rsseater.convert.XmlFeedsConverter;
-import com.uzabase.rsseater.feeds.Feeds;
 import com.uzabase.rsseater.input.FeedsReader;
 import com.uzabase.rsseater.input.XmlFeedsFileReader;
+import com.uzabase.rsseater.input.XmlFeedsReader;
 import com.uzabase.rsseater.output.FeedsWriter;
 import com.uzabase.rsseater.output.FileOutputFeedsWriter;
 import com.uzabase.rsseater.output.StandardOutputFeedsWriter;
-import org.w3c.dom.Document;
+
+import java.io.InputStream;
 
 /**
  * <ul>
@@ -37,27 +38,16 @@ public class RssEater {
     public RssEater(String configFile) {
         config = new JsonConfig(configFile);
         feedsReader = new XmlFeedsFileReader();
-        feedsConverter = new XmlFeedsConverter(config.getFieldsToProcess(), config.getProcessPhrase());
+        feedsConverter = new XmlFeedsConverter(config);
         fileOutputFeedsWriter = new FileOutputFeedsWriter();
         stdOutputFeedsWriter = new StandardOutputFeedsWriter();
     }
 
     public void process() {
-        final Document feeds = feedsReader.read(config.getFeedsEndpoint());
-        final Feeds convertedFeeds = feedsConverter.convert(feeds);
+        final InputStream feeds = feedsReader.read(config.getFeedsEndpoint());
+        final String convertedFeeds = feedsConverter.convert(feeds);
         fileOutputFeedsWriter.write(convertedFeeds);
         stdOutputFeedsWriter.write(convertedFeeds);
     }
 
-
-    public static void main(String[] args) {
-        RssEater rssEater;
-        if (args.length == 0) {
-            rssEater = new RssEater();
-        } else {
-            rssEater = new RssEater(args[0]);
-        }
-
-        rssEater.process();
-    }
 }

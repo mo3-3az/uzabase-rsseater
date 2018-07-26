@@ -1,6 +1,7 @@
 {
   "feedsEndpoint": "http://tech.uzabase.com/rss",
   "processPhrase": "NewsPicks",
+  "caseSensitive": false,
   "fieldsToProcess": [
     "title",
     "description"
