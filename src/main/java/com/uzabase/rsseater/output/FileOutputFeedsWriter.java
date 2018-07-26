@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
+ * File based implementation which will write the processed feeds to an xml file.
+ *
  * @author Moath
  */
 public class FileOutputFeedsWriter implements FeedsWriter {

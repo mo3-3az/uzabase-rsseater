@@ -3,12 +3,16 @@ package com.uzabase.rsseater;
 import com.uzabase.rsseater.rss.RssEater;
 
 /**
+ * This is the main entry point to the application.
+ *
  * @author Moath
  */
 public class Main {
 
+    /**
+     * You can optionally pass a config file.
+     */
     public static void main(String[] args) {
-        long start = System.currentTimeMillis();
         RssEater rssEater;
         if (args.length == 0) {
             rssEater = new RssEater();
@@ -17,8 +21,5 @@ public class Main {
         }
 
         rssEater.process();
-
-        System.out.println("Time taken: " + (System.currentTimeMillis() - start));
-        System.out.println("Memory taken: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000);
     }
 }
