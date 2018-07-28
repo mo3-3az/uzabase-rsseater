@@ -1,6 +1,6 @@
 {
   "feedsEndpoint": "http://tech.uzabase.com/rss",
-  "processPhrase": "Driveとの連携",
+  "processPhrase": "NewsPicks",
   "caseSensitive": true,
   "fieldsToProcess": [
     "title",
