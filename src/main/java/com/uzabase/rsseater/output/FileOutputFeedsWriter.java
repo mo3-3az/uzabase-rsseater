@@ -2,8 +2,8 @@ package com.uzabase.rsseater.output;
 
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -11,27 +11,25 @@ import java.io.IOException;
  *
  * @author Moath
  */
-public class FileOutputFeedsWriter implements FeedsWriter {
+public class FileOutputFeedsWriter extends FileOutputStream {
 
-    static final String OUTPUT_XML = "output.xml";
+    private final static Logger logger = Logger.getLogger(StandardOutputFeedsWriter.class);
 
-    private final static Logger logger = Logger.getLogger(FileOutputFeedsWriter.class);
+    private static final String OUTPUT_XML = "output.xml";
 
-    public void write(String feeds) {
-        if (feeds == null) {
-            logger.error("Feeds string is null, no writing to file will take place!");
+    public FileOutputFeedsWriter() throws FileNotFoundException {
+        super(OUTPUT_XML);
+    }
+
+    public void write(String data) {
+        if (data == null) {
             return;
         }
 
         try {
-            FileWriter fileWriter = new FileWriter(new File(OUTPUT_XML));
-            fileWriter.write(feeds);
-            fileWriter.flush();
-            fileWriter.close();
-
-            logger.info("Processed feeds were written to a file (" + OUTPUT_XML + ") successfully.");
+            write(data.getBytes());
         } catch (IOException e) {
-            logger.error("Error while writing feeds to file.");
+            logger.error("Error while writing bytes to file output stream!", e);
         }
     }
 }

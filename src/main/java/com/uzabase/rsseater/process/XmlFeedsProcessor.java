@@ -1,21 +1,24 @@
 package com.uzabase.rsseater.process;
 
 import com.uzabase.rsseater.config.Config;
+import com.uzabase.rsseater.output.FileOutputFeedsWriter;
+import com.uzabase.rsseater.output.StandardOutputFeedsWriter;
 import org.apache.log4j.Logger;
 
 import javax.xml.stream.*;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.StringWriter;
 
 /**
  * This is the main implementation of the feeds processors.
  * This processor utilizes StAX implementations, XMLEventReader and XMLEventWriter.
  *
  * <p>
- * There are three issues with these implementations, however two of these issues were resolved.
+ * There are three issues with these implementations, however one is resolved the other two are
+ * irrelevant since they don't affect the structure of the xml document.
+ *
  * <ol>
  * <li>Issue#1: Doesn't encode html properly. (resolved).</li>
  * <li>Issue#2: Doesn't maintain the attributes order.</li>
@@ -29,26 +32,36 @@ public class XmlFeedsProcessor implements FeedsProcessor {
     private final static Logger logger = Logger.getLogger(XmlFeedsProcessor.class);
 
     private static final String EMPTY_STRING = "";
+    private static final String ENCODED_QUOTE = "&quot;";
+    private static final String ENCODED_SINGLE_QUOTE = "&#39;";
 
     private Config config;
 
     @Override
-    public String process(InputStream xmlFeeds, Config config) {
+    public void process(InputStream xmlFeeds, Config config) {
         if (xmlFeeds == null) {
             logger.error("Input stream is null, no processing will take place!");
-            return null;
+            return;
         }
-
 
         this.config = config;
         String processPhrase = config.caseSensitive() ? config.getProcessPhrase() : "(?i)" + config.getProcessPhrase();
-        final StringWriter xmlStringWriter = new StringWriter();
+
+        XMLEventWriter stdOutputXmlEventWriter = null;
+        XMLEventWriter fileXmlEventWriter = null;
+        XMLEventReader reader = null;
+        StandardOutputFeedsWriter stdOutputFeedsWriter;
+        FileOutputFeedsWriter fileOutputFeedsWriter;
+
         try {
             XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-            XMLEventReader reader = inputFactory.createXMLEventReader(xmlFeeds);
+            reader = inputFactory.createXMLEventReader(xmlFeeds);
 
             XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-            XMLEventWriter writer = outputFactory.createXMLEventWriter(xmlStringWriter);
+            stdOutputFeedsWriter = new StandardOutputFeedsWriter();
+            stdOutputXmlEventWriter = outputFactory.createXMLEventWriter(stdOutputFeedsWriter);
+            fileOutputFeedsWriter = new FileOutputFeedsWriter();
+            fileXmlEventWriter = outputFactory.createXMLEventWriter(fileOutputFeedsWriter);
 
             XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 
@@ -56,7 +69,8 @@ public class XmlFeedsProcessor implements FeedsProcessor {
             while (reader.hasNext()) {
                 final XMLEvent xmlEvent = reader.nextEvent();
                 if (notEventOfInterest(lastProcessedTag, xmlEvent)) {
-                    writer.add(xmlEvent);
+                    stdOutputXmlEventWriter.add(xmlEvent);
+                    fileXmlEventWriter.add(xmlEvent);
                     lastProcessedTag = xmlEvent.isStartElement() ? xmlEvent.asStartElement().getName().toString() : EMPTY_STRING;
                     continue;
                 }
@@ -65,34 +79,47 @@ public class XmlFeedsProcessor implements FeedsProcessor {
                 final Characters characters = eventFactory.createCharacters(data);
                 switch (data) {
                     case "\"": //Check issue #1
-                        xmlStringWriter.write("&quot;");
+                        stdOutputFeedsWriter.write(ENCODED_QUOTE);
+                        fileOutputFeedsWriter.write(ENCODED_QUOTE);
                         break;
 
                     case "'": //Check issue #1
-                        xmlStringWriter.write("&#39;");
+                        stdOutputFeedsWriter.write(ENCODED_SINGLE_QUOTE);
+                        fileOutputFeedsWriter.write(ENCODED_SINGLE_QUOTE);
                         break;
 
                     default:
-                        writer.add(characters);
+                        fileXmlEventWriter.add(characters);
+                        stdOutputXmlEventWriter.add(characters);
                         break;
                 }
             }
 
-            xmlStringWriter.flush();
-            logger.info("Feeds stream was processed successfully.");
-
         } catch (XMLStreamException e) {
             logger.error("Error while processing xml feeds!", e);
+        } catch (FileNotFoundException e) {
+            logger.error("Error while creating file output stream xml feeds!", e);
         } finally {
-            try {
-                xmlStringWriter.close();
-                xmlFeeds.close();
-            } catch (IOException e) {
-                logger.error("Error while closing streams!", e);
-            }
+            closeStreams(reader, stdOutputXmlEventWriter, fileXmlEventWriter);
         }
+    }
 
-        return xmlStringWriter.toString();
+    private void closeStreams(XMLEventReader xMLEventReader, XMLEventWriter stdOutputXmlEventWriter, XMLEventWriter fileXmlEventWriter) {
+        try {
+            if (stdOutputXmlEventWriter != null) {
+                stdOutputXmlEventWriter.flush();
+                stdOutputXmlEventWriter.close();
+            }
+
+            if (fileXmlEventWriter != null) {
+                fileXmlEventWriter.flush();
+                fileXmlEventWriter.close();
+            }
+
+            xMLEventReader.close();
+        } catch (XMLStreamException e) {
+            logger.error("Error while closing xml event streams!", e);
+        }
     }
 
     private boolean notEventOfInterest(String lastProcessedTag, XMLEvent xmlEvent) {

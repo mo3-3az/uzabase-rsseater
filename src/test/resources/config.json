@@ -1,9 +1,0 @@
-{
-  "feedsEndpoint": "http://tech.uzabase.com/rss",
-  "processPhrase": "RemoveMe",
-  "caseSensitive": true,
-  "fieldsToProcess": [
-    "note",
-    "notes"
-  ]
-}
