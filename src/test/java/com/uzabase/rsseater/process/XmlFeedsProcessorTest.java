@@ -3,7 +3,6 @@ package com.uzabase.rsseater.process;
 import com.uzabase.rsseater.config.JsonConfig;
 import junit.framework.TestCase;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class XmlFeedsProcessorTest extends TestCase {
 
@@ -13,14 +12,12 @@ public class XmlFeedsProcessorTest extends TestCase {
         feedsProcessor = new XmlFeedsProcessor();
     }
 
-    @Test
     public void testValidInputStream() {
         final JsonConfig config = new JsonConfig();
         final String processedFeeds = feedsProcessor.process(getClass().getResourceAsStream("/feeds.xml"), config);
         Assert.assertFalse(processedFeeds.contains(config.getProcessPhrase()));
     }
 
-    @Test
     public void testInvalidInputStream() {
         final JsonConfig config = new JsonConfig();
         final String processedFeeds = feedsProcessor.process(null, config);

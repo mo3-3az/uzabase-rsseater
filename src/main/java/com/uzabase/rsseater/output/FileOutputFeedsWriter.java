@@ -13,6 +13,8 @@ import java.io.IOException;
  */
 public class FileOutputFeedsWriter implements FeedsWriter {
 
+    public static final String OUTPUT_XML = "output.xml";
+
     private final static Logger logger = Logger.getLogger(FileOutputFeedsWriter.class);
 
     public void write(String feeds) {
@@ -22,7 +24,7 @@ public class FileOutputFeedsWriter implements FeedsWriter {
         }
 
         try {
-            FileWriter fileWriter = new FileWriter(new File("output.xml"));
+            FileWriter fileWriter = new FileWriter(new File(OUTPUT_XML));
             fileWriter.write(feeds);
             fileWriter.flush();
             fileWriter.close();

@@ -3,7 +3,6 @@ package com.uzabase.rsseater.output;
 
 import junit.framework.TestCase;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.File;
 
@@ -15,15 +14,13 @@ public class FileOutputFeedsWriterTest extends TestCase {
         feedsWriter = new FileOutputFeedsWriter();
     }
 
-    @Test
     public void testValidData() {
         feedsWriter.write("Test");
-        Assert.assertTrue(new File("output.xml").exists());
+        Assert.assertTrue(new File(FileOutputFeedsWriter.OUTPUT_XML).exists());
     }
 
-    @Test
     public void testInvalidData() {
-        String outputFileName = "output.xml";
+        String outputFileName = FileOutputFeedsWriter.OUTPUT_XML;
         final boolean delete = new File(outputFileName).delete();
         if (!delete) {
             outputFileName = String.format("%s%d", outputFileName, System.currentTimeMillis());

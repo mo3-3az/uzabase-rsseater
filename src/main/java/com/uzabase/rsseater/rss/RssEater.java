@@ -13,6 +13,9 @@ import com.uzabase.rsseater.process.XmlFeedsProcessor;
 import java.io.InputStream;
 
 /**
+ * This class aggregates the three modules which pour into each other
+ * to process the feeds.
+ *
  * <ul>
  * <li>Load configurations.</li>
  * <li>Consume feeds.</li>

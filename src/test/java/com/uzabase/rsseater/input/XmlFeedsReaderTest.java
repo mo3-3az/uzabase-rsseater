@@ -3,7 +3,6 @@ package com.uzabase.rsseater.input;
 
 import junit.framework.TestCase;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +16,6 @@ public class XmlFeedsReaderTest extends TestCase {
         feedsReader = new XmlFeedsReader();
     }
 
-    @Test
     public void testValidUri() {
         final InputStream inputStream = feedsReader.read("https://www.google.com");
         try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {
@@ -27,7 +25,6 @@ public class XmlFeedsReaderTest extends TestCase {
         }
     }
 
-    @Test
     public void testInvalidUri() {
         try (InputStream inputStream = feedsReader.read("https://wwwgooglecom")) {
             Assert.assertNull(inputStream);

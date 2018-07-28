@@ -4,6 +4,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.uzabase.rsseater.exception.ConfigurationException;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -46,7 +47,7 @@ public class JsonConfig implements Config {
                 LOGGER.info("Loading configurations file: " + configFile);
             } catch (FileNotFoundException e) {
                 LOGGER.fatal("Error while loading configurations from file: " + configFile, e);
-                throw new RuntimeException("Error while loading configurations from file: " + configFile, e);
+                throw new ConfigurationException("Error while loading configurations from file: " + configFile, e);
             }
         }
 
@@ -54,7 +55,7 @@ public class JsonConfig implements Config {
             config = new JsonParser().parse(new InputStreamReader(configFileStream)).getAsJsonObject();
         } catch (JsonIOException | JsonSyntaxException e) {
             LOGGER.fatal("Error while parsing configurations from file: " + configFile + ", falling back to default configurations.", e);
-            throw new RuntimeException("Error while parsing configurations from file: " + configFile, e);
+            throw new ConfigurationException("Error while parsing configurations from file: " + configFile, e);
         }
     }
 
