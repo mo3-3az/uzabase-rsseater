@@ -22,6 +22,7 @@ public class XmlFeedsReader implements FeedsReader {
         try {
             client.executeMethod(method);
             inputStream = method.getResponseBodyAsStream();
+            logger.info("Input stream was opened successfully. Uri: " + feedsUri);
         } catch (IOException e) {
             logger.error("Error while reading the xml stream! Feeds Uri: " + feedsUri, e);
         }

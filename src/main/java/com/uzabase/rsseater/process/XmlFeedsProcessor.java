@@ -55,7 +55,7 @@ public class XmlFeedsProcessor implements FeedsProcessor {
             String lastProcessedTag = EMPTY_STRING;
             while (reader.hasNext()) {
                 final XMLEvent xmlEvent = reader.nextEvent();
-                if (notFieldOfInterest(lastProcessedTag, xmlEvent)) {
+                if (notEventOfInterest(lastProcessedTag, xmlEvent)) {
                     writer.add(xmlEvent);
                     lastProcessedTag = xmlEvent.isStartElement() ? xmlEvent.asStartElement().getName().toString() : EMPTY_STRING;
                     continue;
@@ -79,6 +79,8 @@ public class XmlFeedsProcessor implements FeedsProcessor {
             }
 
             xmlStringWriter.flush();
+            logger.info("Feeds stream was processed successfully.");
+
         } catch (XMLStreamException e) {
             logger.error("Error while processing xml feeds!", e);
         } finally {
@@ -93,7 +95,7 @@ public class XmlFeedsProcessor implements FeedsProcessor {
         return xmlStringWriter.toString();
     }
 
-    private boolean notFieldOfInterest(String lastProcessedTag, XMLEvent xmlEvent) {
+    private boolean notEventOfInterest(String lastProcessedTag, XMLEvent xmlEvent) {
         return !xmlEvent.isCharacters() || !config.getFieldsToProcess().contains(lastProcessedTag);
     }
 
