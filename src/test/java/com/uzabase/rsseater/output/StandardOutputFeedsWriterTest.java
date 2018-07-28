@@ -10,5 +10,7 @@ public class StandardOutputFeedsWriterTest extends TestCase {
 
     @Test
     public void test() {
+        FeedsWriter feedsWriter = new StandardOutputFeedsWriter();
+        feedsWriter.write("Test");
     }
 }

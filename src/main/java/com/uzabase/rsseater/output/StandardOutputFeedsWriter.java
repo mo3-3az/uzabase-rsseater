@@ -8,6 +8,8 @@ package com.uzabase.rsseater.output;
 public class StandardOutputFeedsWriter implements FeedsWriter {
 
     public void write(String feeds) {
-        System.out.println(feeds);
+        if (feeds != null) {
+            System.out.println(feeds);
+        }
     }
 }

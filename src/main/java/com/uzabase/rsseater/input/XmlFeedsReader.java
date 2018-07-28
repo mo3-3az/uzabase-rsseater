@@ -18,12 +18,14 @@ public class XmlFeedsReader implements FeedsReader {
     public InputStream read(String feedsUri) {
         HttpClient client = new HttpClient();
         HttpMethod method = new GetMethod(feedsUri);
+        InputStream inputStream = null;
         try {
             client.executeMethod(method);
-            return method.getResponseBodyAsStream();
+            inputStream = method.getResponseBodyAsStream();
         } catch (IOException e) {
-            logger.fatal("Error while reading the xml stream! Feeds Uri: " + feedsUri, e);
-            throw new RuntimeException("Error while reading the xml stream! Feeds Uri: " + feedsUri, e);
+            logger.error("Error while reading the xml stream! Feeds Uri: " + feedsUri, e);
         }
+
+        return inputStream;
     }
 }

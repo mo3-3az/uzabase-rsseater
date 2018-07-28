@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import javax.xml.stream.*;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
@@ -33,6 +34,12 @@ public class XmlFeedsProcessor implements FeedsProcessor {
 
     @Override
     public String process(InputStream xmlFeeds, Config config) {
+        if (xmlFeeds == null) {
+            logger.error("Input stream is null, no processing will take place!");
+            return null;
+        }
+
+
         this.config = config;
         String processPhrase = config.caseSensitive() ? config.getProcessPhrase() : "(?i)" + config.getProcessPhrase();
         final StringWriter xmlStringWriter = new StringWriter();
@@ -54,12 +61,11 @@ public class XmlFeedsProcessor implements FeedsProcessor {
                     continue;
                 }
 
-                String data = xmlEvent.asCharacters().getData();
-                final Characters characters = eventFactory.createCharacters(data.replaceAll(processPhrase, EMPTY_STRING));
-
+                String data = xmlEvent.asCharacters().getData().replaceAll(processPhrase, EMPTY_STRING);
+                final Characters characters = eventFactory.createCharacters(data);
                 switch (data) {
                     case "\"": //Check issue #1
-                        characters.writeAsEncodedUnicode(xmlStringWriter);
+                        xmlStringWriter.write("&quot;");
                         break;
 
                     case "'": //Check issue #1
@@ -75,6 +81,13 @@ public class XmlFeedsProcessor implements FeedsProcessor {
             xmlStringWriter.flush();
         } catch (XMLStreamException e) {
             logger.error("Error while processing xml feeds!", e);
+        } finally {
+            try {
+                xmlStringWriter.close();
+                xmlFeeds.close();
+            } catch (IOException e) {
+                logger.error("Error while closing streams!", e);
+            }
         }
 
         return xmlStringWriter.toString();

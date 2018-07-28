@@ -28,6 +28,10 @@ public class JsonConfig implements Config {
 
     private JsonObject config;
 
+    public JsonConfig() {
+        this(null);
+    }
+
     /**
      * Will load the passed file if passed and a valid json file, otherwise will terminate.
      */

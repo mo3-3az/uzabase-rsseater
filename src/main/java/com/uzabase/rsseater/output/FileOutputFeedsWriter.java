@@ -16,6 +16,11 @@ public class FileOutputFeedsWriter implements FeedsWriter {
     private final static Logger logger = Logger.getLogger(FileOutputFeedsWriter.class);
 
     public void write(String feeds) {
+        if (feeds == null) {
+            logger.error("Feeds string is null, no writing to file will take place!");
+            return;
+        }
+
         try {
             FileWriter fileWriter = new FileWriter(new File("output.xml"));
             fileWriter.write(feeds);

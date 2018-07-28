@@ -1,9 +1,9 @@
 {
   "feedsEndpoint": "http://tech.uzabase.com/rss",
-  "processPhrase": "Driveとの連携",
+  "processPhrase": "RemoveMe",
   "caseSensitive": true,
   "fieldsToProcess": [
-    "title",
-    "description"
+    "note",
+    "notes"
   ]
 }
